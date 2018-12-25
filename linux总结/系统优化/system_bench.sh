@@ -82,7 +82,35 @@ cpu_test(){
 }
 
 mysql_test(){
-	echo "mysql_test"
+	clear
+	echo "数据库测试 确保数据库中存在sbtest库，且测试账号拥有权限。”
+	echo “请输入数据库连接信息"
+	base_dir='/usr/share/sysbench/'
+	read -p "数据库用户名:" username
+	read -sp "数据库密码:" passwd
+	echo ""
+	while [ 1 -eq 1 ]
+		do
+			read -p "请选择mysql 连接方式[socket|host]:" connect
+			case "$connect" in
+			"socket")
+				read -p "请输入数据库socket文件路径:" connect_way
+				[ -S $connect_way ]&& connect_str="--mysql-host=${connect_way}";break || echo -e "\033[31msocket 文件路径不存在 或 不是一个socket文件！\033[0m"
+				;;
+			"host")
+				read -p "请输入数据库IP地址/域名:" connect_way
+				ping $connect_way -c 1 -w 5 >/dev/null 2>&1
+				[ $? -eq 0 ]&& connect_str="--mysql-host=${connect_way}";break || echo -e "\033[31m网络地址无法到达\033[0m"	
+			
+			esac
+	
+	echo "数据库准备"
+	sysbench /usr/share/sysbench/oltp_read_only.lua --threads=4  --mysql-user=pycf --mysql-password=1qaz@WSXabc --mysql-port=3320 --tables=10 --table-size=1000000 prepare
+ 
+	done
+	
+
+
 }
 
 
