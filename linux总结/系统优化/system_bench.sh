@@ -33,14 +33,41 @@ sysbench 基准测试工具
 $sysbench_version  
 测试项目:
 
+1. 系统测试
+2. Mysql 数据库测试
+
+==========
+EOF
+}
+
+system_menu(){
+clear
+cat<<EOF
+系统测试项目:
+
 1. 磁盘io测试
 2. 内存测试
 3. CPU测试
-4. Mysql 数据库测试
 
 ==========
 注意: io测试至少需要 150G 的剩余空间。
 EOF
+read -p " 请选择测试内容:" num
+case "$num" in 
+	"1")
+		io_test
+		;;
+	"2")
+		mem_test
+		;;
+	"3")
+		cpu_test
+		;;
+	"*")
+		echo "input error"
+
+esac
+
 }
 
 io_test(){
@@ -180,19 +207,13 @@ main_menu
 read -p "请选择测试内容:" num
 case "$num" in
 "1")
-	io_test
+	system_menu
 	;;
 "2")
-	mem_test
-	;;
-"3")
-	cpu_test
-	;;
-"4")
 	mysql_test
 	;;
 *)
-	echo "plz input num in 1-4"
+	echo "input error"
 	;;
 esac
 
