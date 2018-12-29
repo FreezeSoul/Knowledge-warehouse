@@ -86,12 +86,12 @@ mysql_test(){
 	echo -ne "数据库测试 \033[31m确保数据库中存在sbtest库，且测试账号拥有权限。\033[0m"
 	while [ 1 -eq 1 ]
 	do
-		read -p "数据库准备是否OK ?[Y/N]" prepare
-		case "$prepare" in
-		      	"N")  
+		read -p "数据库准备是否OK ?(Y)是 (N)否 [Y]" prepare
+		case "${prepare:-Y}" in
+		      	"N"|"n")  
 				exit 0
 				;;
-			"Y")
+			"Y"|"y")
 				break
 				;;
 	
@@ -108,15 +108,17 @@ mysql_test(){
 		
 		while [ 1 -eq 1 ]
 		do
-			read -p "请选择mysql 连接方式[socket|host]:" connect
+			read -p "请选择mysql 连接方式 (S)ocket (H)ost :" connect
 			case "$connect" in
-			"socket")
+			"S"|"s")
 				read -p "请输入数据库socket文件路径:" connect_way
 				[ -S $connect_way ]&& connect_str="--mysql-socket=${connect_way}";break || echo -e "\033[31msocket 文件路径不存在 或 不是一个socket文件！\033[0m"
 				;;
-			"host")
-				read -p "请输入数据库IP地址/域名:" connect_way
-				read -p "请输入数据库端口:" port
+			"H"|"h")
+				read -p "请输入数据库IP地址/域名 [127.0.0.1]:" connect_way
+				read -p "请输入数据库端口: [3306]" port
+				connect_way=${connect_way:-127.0.0.1}
+				port=${port:-3306}
 				ping $connect_way -c 1 -w 5 >/dev/null 2>&1
 				[ $? -eq 0 ]&&{
 connect_str="--mysql-host=${connect_way} --mysql-port=${port}"
