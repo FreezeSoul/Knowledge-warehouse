@@ -7,6 +7,8 @@ functions这个脚本是给/etc/init.d里边的文件使用的（可理解为全
 提供了一些基础的功能，看看里边究竟有些什么。首先会设置umask，path，还有语言环境，然后会设置success,failure,warning,normal几种情况下的字体颜色。
 
 下面再看看提供的重要方法：
+
+```
 checkpid:检查是否已存在pid，如果有一个存在，返回0（通过查看/proc目录）
 daemon:启动某个服务。/etc/init.d目录部分脚本的start使用到这个
 killproc:杀死某个进程。/etc/init.d目录部分脚本的stop使用到这个
@@ -18,6 +20,7 @@ success,failure,passed,warning分别记录日志并调用相应的方法
 action:打印某个信息并执行给定的命令，它会根据命令执行的结果来调用 success,failure方法
 strstr:判断$1是否含有$2
 confirm:显示 "Start service $1 (Y)es/(N)o/(C)ontinue? [Y]"的提示信息，并返回选择结果
+```
 
  
 
