@@ -1,6 +1,8 @@
-# k8s 总结
+**k8s 知识点总结**
 
-## kubenetes 特性
+[TOC]
+
+# kubenetes 特性
 
 - 足鼎封装、自我修复、水平扩展、服务发现、负载均衡
 - 自动发布、回滚
@@ -10,6 +12,10 @@
 
 - GET PUT DELETE POST
 - kubectl run get edit ...
+
+
+
+# Kubenetes资源
 
 ## 常用资源对象
 
@@ -64,9 +70,9 @@ kubectl explain pods.metadata
 kubectl explain pods.spec.containers
 ```
 
-### Pod 资源常用标签
+## Pod 
 
-#### pods.spec.containers 必须
+### pods.spec.containers 必须
 
 ```
 - name <string>
@@ -94,23 +100,101 @@ args         <[]string>
   https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
 ```
 
-#### nodeSelector <map [string]string>
+### nodeSelector <map [string]string>
 
 节点选择器， 限定pod运行在哪些节点上。
 
 使用标签选择器
 
-#### nodeName<map [string]string>
+### nodeName<map [string]string>
 
 直接选择节点
 
-#### annotations
+### annotations
 
 注解，仅用于提供”元数据“并不提供 资源兑现选择。没有大小限制。 
 
+### restartPolicy
+
+Always, OnFailure, Never   Default to Always
 
 
-### 标签labels
+
+### pod的生命周期
+
+- 串行执行多个 init_containters（初始化容器），初始化容器执行完成后退出。
+- 启动主容器 main containters
+  - 启动后可以执行 post start
+  - 主进程执行时可以进行健康监测包括：liveness probe 与 readness probe
+  - 结束前可以执行 pre stop
+
+**状态**：
+
+- Pending 等待调度，调度未完成
+
+- Running 运行状态
+
+- Failed 失败
+
+- Succeeded
+
+- Unknown
+
+  等等 
+
+**创建Pod：**
+
+apiServer  etcd  scheduler  controller  kubelet 
+
+**容器重启策略**：
+
+restartPolicy
+
+
+
+### 健康监测
+
+健康监测主要针对容器，所以在 pod.spec.containers 层级下
+
+**监测类型**
+
+- livenessProbe       存活性探测
+
+- readnessProbe     就绪性监测
+
+  **存活并不一定就绪**
+
+**三种探针类型**
+
+ExecAction、TCPSocketAction、HTTPGetAction
+
+**健康监测主要参数**
+
+- exec  使用命令监测 (重要)
+
+  - command	<[]string>
+
+- httpGet 
+
+- tcpSocket
+
+- initialDelaySeconds (重要) 初始化等待时间
+
+- periodSeconds (重要)  检测间隔时间
+
+- timeoutSeconds <integer> 错误超时时间 默认1秒
+
+- failureThreshold	<integer>  最小失败次数 默认3次
+
+- successThreshold <integer>  最小成功次数 默认1次
+
+  
+
+
+
+
+
+## 标签labels
 
 labels  与 资源之间是多对多的关系
 
