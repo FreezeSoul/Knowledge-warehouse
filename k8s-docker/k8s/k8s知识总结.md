@@ -216,6 +216,12 @@ args         <[]string>
 
 Always, OnFailure, Never   Default to Always
 
+###  hostNetwork <boolean>
+
+Host networking requested for this pod. Use the host's network namespace.If this option is set, the ports that will be used must be specified. Default to false.
+
+pod直接使用主机的网络名称空间。有用但不常用，默认false。
+
 
 
 ### pod的生命周期
@@ -359,7 +365,7 @@ spec:
 
 ### deployment
 
-#### 更新策略
+**更新策略**
 
 **deployment.spec.strategy**
 
@@ -443,7 +449,9 @@ spec:
 
 在每个节点上部署一个pod
 
-支持滚动更新
+支持滚动更新，支持两种更新模式。可以使用`kubectl explain daemonset.spec.updateStrategy`  查看。
+
+手动更新 `kubectl set image daemonset abc *=nginx:1.9.1`
 
 **案例：**
 
@@ -479,9 +487,35 @@ spec:
 
 
 
+## Service
 
+Service的名称解析依赖于dns 附件，网络依赖于第三方网络方案。
 
+Service网络是一个虚拟网络，由kube-proxy维护。
 
+工作模式：
 
+- iptables
+- ipvs
 
+ipvs没有被激活的情况下自动使用iptables
+
+iptables 查看：
+
+`iptables -L -n  -t nat`
+
+**svc.spec的重要字段**
+
+- ports <[]Object>
+  - port
+  - nodePort
+  - targetPort
+- nodepo
+- selector
+- type ： ExternalName, ClusterIP, NodePort, and LoadBalancer.
+- healthCheckNodePort <integer>
+
+**域名后缀**
+
+默认为svc_name.cluster.local.
 
