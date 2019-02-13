@@ -598,7 +598,6 @@ status:
 - https ingress:  https://github.com/gjmzj/kubeasz/blob/master/docs/guide/ingress-tls.md
 
 ```
-apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: my-nginx-ingress
@@ -608,10 +607,14 @@ spec:
   - host: my-nginx.com
     http:
       paths:
-      - path: /
+      - path: /main
         backend:
           serviceName: my-nginx
           servicePort: 80
+      - path: /busybox
+        backend:
+          serviceName: busybox-demo
+          servicePort: 80 
 ```
 
 **path**: Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request. Currently it can contain characters disallowed from the conventional "path" part of a URL as defined by RFC 3986. Paths must begin with a '/'. If unspecified, the path defaults to a catch all  sending traffic to the backend.
@@ -631,24 +634,30 @@ kubectl explain pod.spec.volumes
 kubectl explain persistentVolume.spec
 ```
 
-定义一个简单的emptyDir
+定义一个简单的emptyDir, 包涵两个containers。两个容器公用存储卷。
 
 ```
 apiVersion: v1
 kind: Pod
 metadata:
-  name: buxybox-demo
+  name: busybox-demo
   labels:
-    app: buxybox
+    app: busybox
     role: volume_test
 spec:
   containers:
+  - name: httpd
+    image: nginx:latest
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html/
+      name: tmp-volume
   - name: busybox
     image: busybox:latest
     imagePullPolicy: IfNotPresent
-    command: ['/bin/sh','-c','sleep 3600']
+    command: ['/bin/sh','-c','while true;do echo $(date) > /data/index.html;sleep 3;done']
     volumeMounts:
-    - mountPath: /emptyDir
+    - mountPath: /data/
       name: tmp-volume
   volumes:
   - name: tmp-volume
