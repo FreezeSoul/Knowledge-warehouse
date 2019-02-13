@@ -506,16 +506,157 @@ iptables 查看：
 
 **svc.spec的重要字段**
 
+- ClusterIP 一般不手动指定，可以指定为None 则为无头svc。
+
+  设置成无头svc后 dns中的A记录为pod IP地址，A记录的数量与pod数量相当
+
+  例如使用dig命令查看
+
+  ```
+  # dig pyfinance2v2-register-pro.default.svc.cluster.local. @172.20.162.187 
+  
+  ; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7_5.1 <<>> pyfinance2v2-register-pro.default.svc.cluster.local. @172.20.162.187
+  ;; global options: +cmd
+  ;; Got answer:
+  ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3070
+  ;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 1
+  
+  ;; OPT PSEUDOSECTION:
+  ; EDNS: version: 0, flags:; udp: 4096
+  ;; QUESTION SECTION:
+  ;pyfinance2v2-register-pro.default.svc.cluster.local. IN        A
+  
+  ;; ANSWER SECTION:
+  pyfinance2v2-register-pro.default.svc.cluster.local. 5 IN A 172.20.197.37
+  pyfinance2v2-register-pro.default.svc.cluster.local. 5 IN A 172.20.229.141
+  pyfinance2v2-register-pro.default.svc.cluster.local. 5 IN A 172.20.41.13
+  
+  ;; Query time: 2 msec
+  ;; SERVER: 172.20.162.187#53(172.20.162.187)
+  ;; WHEN: Wed Feb 13 10:23:49 CST 2019
+  ;; MSG SIZE  rcvd: 281
+  ```
+
 - ports <[]Object>
+
   - port
   - nodePort
   - targetPort
-- nodepo
+
 - selector
-- type ： ExternalName, ClusterIP, NodePort, and LoadBalancer.
+
+- type ： ExternalName（访问外部服务 例如 GlusterFs）, ClusterIP, NodePort, and LoadBalancer( 外部负载均衡 ).
+
 - healthCheckNodePort <integer>
+
+- sessionAffinity ：ClientIP 和 None  ，负载均衡调度策略。设置为ClientIP 则将同一个ip的连接发送到后端同一个pod上。
 
 **域名后缀**
 
-默认为svc_name.cluster.local.
+默认为svc_name.namespace_name.svc.cluster.local.
+
+**案例：**
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose-pro.yml
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pyfinance2v2-amc-pro
+  name: pyfinance2v2-amc-pro
+  namespace: pyfinance2v2-pro
+spec:
+  type: NodePort
+  ports:
+  - name: "7562"
+    port: 7562
+    targetPort: 5000
+    nodePort: 7562
+  selector:
+    io.kompose.service: pyfinance2v2-amc-pro
+status:
+  loadBalancer: {}
+```
+
+## Ingress Controller
+
+外部路由引入，7层负载均衡，可以进行https 卸载。
+
+- HAproxy （不常用）
+- Nginx
+- Traefik   https://docs.traefik.io/user-guide/kubernetes/
+- Envoy
+
+**案例：**
+
+- http ingress:  https://github.com/gjmzj/kubeasz/blob/master/docs/guide/ingress.md
+
+- https ingress:  https://github.com/gjmzj/kubeasz/blob/master/docs/guide/ingress-tls.md
+
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-nginx-ingress
+  namespace: default
+spec:
+  rules:
+  - host: my-nginx.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: my-nginx
+          servicePort: 80
+```
+
+**path**: Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request. Currently it can contain characters disallowed from the conventional "path" part of a URL as defined by RFC 3986. Paths must begin with a '/'. If unspecified, the path defaults to a catch all  sending traffic to the backend.
+
+例如 path 设置为 /main 则可以访问 /main /main1  等。不能访问 / 、/aaa  等其他路径下资源
+
+## 存储卷管理
+
+- emptyDir 临时存储目录
+- hostPath  主机存储
+- 网络共享存储： SAN   NAS   分布式存储（glusterfs  rbd cephfs ...）  云存储
+
+**支持的存储卷类型**
+
+```
+kubectl explain pod.spec.volumes
+kubectl explain persistentVolume.spec
+```
+
+定义一个简单的emptyDir
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buxybox-demo
+  labels:
+    app: buxybox
+    role: volume_test
+spec:
+  containers:
+  - name: busybox
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    command: ['/bin/sh','-c','sleep 3600']
+    volumeMounts:
+    - mountPath: /emptyDir
+      name: tmp-volume
+  volumes:
+  - name: tmp-volume
+    emptyDir:
+      sizeLimit: 200M
+```
+
+
+
+
 
