@@ -310,6 +310,37 @@ FIELDS:
 - exec          <Object>
 - httpGet      <Object>   HTTPGet specifies the http request to perform.
 
+
+
+### env环境变量获取
+
+env不仅可以传递key value 的数据，还可以从其他地方传值传递。
+
+**pods.spec.containers.env.valueFrom**
+
+- configMapKeyRef 
+
+  Selects a key of a ConfigMap.
+
+  
+
+- fieldRef     <Object>
+  Selects a field of the pod: supports metadata.name, metadata.namespace, metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP.
+
+  
+
+- resourceFieldRef     <Object>
+
+  Selects a resource of the container: only resources limits and requests  (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+
+  
+
+- secretKeyRef <Object>
+
+  Selects a key of a secret in the pod's namespace
+
+
+
 ### pod 案例
 
 ```
@@ -598,6 +629,7 @@ status:
 - https ingress:  https://github.com/gjmzj/kubeasz/blob/master/docs/guide/ingress-tls.md
 
 ```
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: my-nginx-ingress
@@ -627,7 +659,7 @@ spec:
 - hostPath  主机存储
 - 网络共享存储： SAN   NAS   分布式存储（glusterfs  rbd cephfs ...）  云存储
 
-**支持的存储卷类型**
+### 支持的存储卷类型
 
 ```
 kubectl explain pod.spec.volumes
@@ -664,6 +696,158 @@ spec:
     emptyDir:
       sizeLimit: 200M
 ```
+
+### PV 与 PVC 资源
+
+![pv与pvc](./pic/pv_pvc.png)
+
+#### PV对象 及 主要参数
+
+**PV对象不属于名称空间**
+
+**pv.Capacity**
+
+通过capacity给PV设置特定的大小。
+
+**pv.accessModes**
+
+k8s不会真正检查存储的访问模式或根据访问模式做访问限制，只是对真实存储的描述，最终的控制权在真实的存储端。目前支持三种访问模式：
+
+\* ReadWriteOnce – PV以 read-write 挂载到一个节点
+
+\* ReadOnlyMany – PV以read-only方式挂载到多个节点
+
+\* ReadWriteMany – PV以read-write方式挂载到多个节点
+
+**pv.spec.persistentVolumeReclaimPolicy**
+
+当前支持的回收策略:
+
+\* Retain – 允许用户手动回收
+
+\* Recycle – 删除PV上的数据 (“rm -rf /thevolume/*”)
+
+\* Delete – 删除PV
+
+
+
+#### PVC对象 与重要参数
+
+**PVC 与PV对象 关联**
+
+**pvc.spec.accessModes**
+
+同 pv对象
+
+**pvc.spec.resources**
+
+- limits
+- requests
+
+定义存储大小的需要
+
+
+
+**案例  Glusterfs：**
+
+```
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: gfs-endpoint
+  labels:
+    storage: gfs
+subsets:
+- addresses:
+  - ip: 192.168.0.165
+  ports:
+  - port: 49158
+    protocol: TCP
+- addresses:
+  - ip: 192.168.0.162
+  - ip: 192.168.0.166
+  ports:
+  - port: 49157
+    protocol: TCP
+--- 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gfs-pvc
+spec:
+  accessModes: 
+  - ReadWriteMany
+  volumeName: gfs-pv
+  resources:
+    requests:
+      storage: 20Gi
+---    
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv
+  labels:
+    role: gfs-pv
+spec:
+  accessModes: 
+  - ReadWriteMany
+  glusterfs:  
+    endpoints: gfs-endpoint
+    path: gluster-test
+  capacity:
+    storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gfs-pvc
+spec:
+  accessModes: 
+  - ReadWriteMany
+  volumeName: gfs-pv
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-demo
+  labels:
+    app: busybox
+    role: volume_test
+spec:
+  containers:
+  - name: httpd
+    image: nginx:latest
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html/busybox
+      name: gfs-volume
+  - name: busybox
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    command: ['/bin/sh','-c','while true;do echo $(date) >> /data/index.html;sleep 3;done']
+    volumeMounts:
+    - mountPath: /data/
+      name: gfs-volume
+  volumes:
+  - name: gfs-volume
+    persistentVolumeClaim:
+      claimName: gfs-pvc
+```
+
+
+
+### StorageClass 动态生成pv
+
+
+
+### 容器配置管理 secret 与 configmap
+
+可以使用环境变量以及 挂载的方式配置到pod当中。
+
+**注意：环境变量的方式只能在容器启动的时候注入，更新configmap 不会更新容器中环境变量的值。使用挂载的方式可以实时更新。**
 
 
 
