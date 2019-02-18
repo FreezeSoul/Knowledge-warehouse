@@ -849,6 +849,73 @@ spec:
 
 **注意：环境变量的方式只能在容器启动的时候注入，更新configmap 不会更新容器中环境变量的值。使用挂载的方式可以实时更新。**
 
+创建configMap 有多种方式
+
+- 使用kubectl create命令行方式
+
+```
+  # Create a new configmap named my-config based on folder bar
+  kubectl create configmap my-config --from-file=path/to/bar
+  
+  # Create a new configmap named my-config with specified keys instead of file basenames on disk
+  kubectl create configmap my-config --from-file=key1=/path/to/bar/file1.txt --from-file=key2=/path/to/bar/file2.txt
+  
+  # Create a new configmap named my-config with key1=config1 and key2=config2
+  kubectl create configmap my-config --from-literal=key1=config1 --from-literal=key2=config2
+  
+  # Create a new configmap named my-config from the key=value pairs in the file
+  kubectl create configmap my-config --from-file=path/to/bar
+  
+  # Create a new configmap named my-config from an env file
+  kubectl create configmap my-config --from-env-file=path/to/bar.env
+```
+
+- 使用yaml文件
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-cfg
+  namespace: default
+data:
+  cache_host: memcached-gcxt
+  cache_port: "11211"
+  cache_prefix: gcxt
+  my.cnf: |
+    [mysqld]
+    log-bin = mysql-bin
+  app.properties: |
+    property.1 = value-1
+    property.2 = value-2
+    property.3 = value-3
+```
+
+使用命令行创建更灵活。
+
+**可以使用inotify监控配置文件实现重载**
+
+例如:
+
+```
+#!/bin/sh
+oldcksum=`cksum /etc/nginx/conf.d/default.conf`
+
+inotifywait -e modify,move,create,delete -mr --timefmt '%d/%m/%y %H:%M' --format '%T' \
+/etc/nginx/conf.d/ | while read date time; do
+
+    newcksum=`cksum /etc/nginx/conf.d/default.conf`
+    if [ "$newcksum" != "$oldcksum" ]; then
+        echo "At ${time} on ${date}, config file update detected."
+        oldcksum=$newcksum
+        nginx -s reload
+    fi
+
+done
+```
+
+关于configmap的详细总结： https://www.cnblogs.com/breezey/p/6582082.html
+
 
 
 
