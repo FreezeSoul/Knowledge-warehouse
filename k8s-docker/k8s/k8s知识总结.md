@@ -841,8 +841,6 @@ spec:
 
 ### StorageClass 动态生成pv
 
-
-
 ### 容器配置管理 secret 与 configmap
 
 可以使用环境变量以及 挂载的方式配置到pod当中。
@@ -915,6 +913,32 @@ done
 ```
 
 关于configmap的详细总结： https://www.cnblogs.com/breezey/p/6582082.html
+
+
+
+## StatefuleSet
+
+**特点：**
+
+1. 稳定且唯一的网络标识符；
+2. 稳定且持久的存储；
+3. 有序、平滑的部署和扩展；
+4. 有序、平滑的删除和终止；
+5. 有序的滚动更新；
+
+**三个主要组件：**headless service 、 StatefulSet、 volumeClaimTemplate
+
+名称解析：
+
+pod_name,service_name.ns_name.svc.cluster.local
+
+
+
+**更新策略**
+
+sts.spec.updateStrategy.rollingUpdate
+
+- partition  定义更新的边界，例如 定义为3 则编号 >=3的 pod会更新，模拟金丝雀发布
 
 
 
