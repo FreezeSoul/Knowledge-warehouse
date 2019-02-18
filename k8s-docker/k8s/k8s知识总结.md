@@ -1127,4 +1127,38 @@ Subresource
 namespace
 Api group
 
-## 与API 进项交互
+## 
+
+## RBCA
+
+kubeconfig 配置kubectl 连入apiServer的配置
+
+```
+# kubectl config view 
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://192.168.0.200:8443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: admin
+  name: kubernetes
+current-context: kubernetes
+kind: Config
+preferences: {}
+users:
+- name: admin
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+```
+
+一个客户端可以配置连接多个集群
+
+context用于定义账号与集群的关系，current-context定义当前访问的集群。
+
+
+
