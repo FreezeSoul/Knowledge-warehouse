@@ -940,7 +940,191 @@ sts.spec.updateStrategy.rollingUpdate
 
 - partition  定义更新的边界，例如 定义为3 则编号 >=3的 pod会更新，模拟金丝雀发布
 
+**PV定义**
 
+```
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: gfs-endpoint
+  labels:
+    storage: gfs
+subsets:
+- addresses:
+  - ip: 192.168.0.165
+  ports:
+  - port: 49158
+    protocol: TCP
+- addresses:
+  - ip: 192.168.0.162
+  - ip: 192.168.0.166
+  ports:
+  - port: 49157
+    protocol: TCP
 
+---
 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv-01
+  labels:
+    role: gfs-pv-01
+spec:
+  accessModes: 
+  - ReadWriteMany
+  - ReadWriteOnce
+  glusterfs:  
+    endpoints: gfs-endpoint
+    path: pv-01
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv-02
+  labels:
+    role: gfs-pv-02
+spec:
+  accessModes:
+  - ReadWriteMany
+  - ReadWriteOnce
+  glusterfs:
+    endpoints: gfs-endpoint
+    path: pv-02
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv-03
+  labels:
+    role: gfs-pv-03
+spec:
+  accessModes:
+  - ReadWriteMany
+  - ReadWriteOnce
+  glusterfs:
+    endpoints: gfs-endpoint
+    path: pv-03
+  capacity:
+    storage: 5Gi
+--- 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv-04
+  labels:
+    role: gfs-pv-04
+spec:
+  accessModes:
+  - ReadWriteMany
+  - ReadWriteOnce
+  glusterfs:
+    endpoints: gfs-endpoint
+    path: pv-04
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-pv-05
+  labels:
+    role: gfs-pv-05
+spec:
+  accessModes:
+  - ReadWriteMany
+  - ReadWriteOnce
+  glusterfs:
+    endpoints: gfs-endpoint
+    path: pv-05
+  capacity:
+    storage: 5Gi
+```
 
+**StatefulSet定义**
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-svc
+  labels:
+    roles: myapp-svc-test
+spec:
+  clusterIP: None
+  ports:
+  - targetPort: 80
+    port: 80
+  selector:
+    roles: myapp-pod
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myapp-sts
+  labels:
+    roles: myapp-sts-test
+spec:
+  replicas: 3
+  serviceName: myapp-svc
+  selector: 
+    matchLabels:
+      roles: myapp-pod
+  template:
+    metadata:
+      labels:
+        roles: myapp-pod
+    spec:
+      containers:
+       - name: httpd
+         image: nginx:latest
+         imagePullPolicy: IfNotPresent
+         volumeMounts:
+         - mountPath: /usr/share/nginx/html/busybox
+           name: gfs-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: gfs-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+  updateStrategy:
+    rollingUpdate: 
+      partition: 2
+```
+
+ 
+
+# k8s认证
+
+**主要使用 RBAC授权检查机制**
+**认证：**  token  ssl(双向认证\加密会话) 
+**授权检查**
+**准入控制**
+
+## 客户端 --->  API Server
+API Server 对用户权限的判断需要以下：
+user： username uid
+group：
+extra：
+
+- 开启api代理
+```
+kubectl proxy
+```
+HTTP request verb
+  get  post  put delte
+API request verb
+  get list create update  path watch(- w) proxy redirect deletecollection
+Resource:
+Subresource
+namespace
+Api group
+
+## 与API 进项交互
