@@ -1127,9 +1127,16 @@ Subresource
 namespace
 Api group
 
-## 
+
 
 ## RBCA
+
+**用户ssl 认证相关**
+
+```
+https://github.com/huruizhi/Knowledge-warehouse/blob/master/linux总结/CA证书与https讲解.md
+https://github.com/gjmzj/kubeasz/blob/master/docs/setup/01-CA_and_prerequisite.md
+```
 
 kubeconfig 配置kubectl 连入apiServer的配置
 
@@ -1160,5 +1167,21 @@ users:
 
 context用于定义账号与集群的关系，current-context定义当前访问的集群。
 
+**RBAC（Role-Based Access Control）**
 
+基于角色的访问控制
 
+![RBAC](./pic/RBAC.png)
+
+- role/clusterrole:
+  - operations
+  - objects
+- rolebinding/clusterrolebinding
+  - user or service account
+  - role
+
+**role 与 rolebinding在名称空间内定义及在当前名称空间内生效。**
+
+**clusterrole 与clusterrolebinding 在集群中定义且在 整个集群内生效**
+
+也可以建立clusterrole 使用 rolebing 进行绑定。
