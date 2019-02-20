@@ -1184,4 +1184,21 @@ context用于定义账号与集群的关系，current-context定义当前访问�
 
 **clusterrole 与clusterrolebinding 在集群中定义且在 整个集群内生效**
 
-也可以建立clusterrole 使用 rolebing 进行绑定。
+**注意：也可以建立clusterrole 使用 rolebing 进行绑定。**
+
+
+
+clusterrole 与clusterrolebinding 
+
+- subject 类型：
+
+ user  group  serviceaccount
+
+role clusterrole:
+
+- object:
+  - resource group
+  - resource
+  - nonResourceURLs
+- action： get, list, watch, patch,  delete, deletecollection
+
