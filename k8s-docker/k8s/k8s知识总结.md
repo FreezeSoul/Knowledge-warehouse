@@ -1127,9 +1127,23 @@ Subresource
 namespace
 Api group
 
-
-
 ## RBCA
+
+### k8s 用户类型
+
+-  user  
+- group 
+- serviceaccount
+
+**serviceaccount 创建**
+
+```
+kubectl create serviceaccount default-ns-admin -n default
+kubectl create rolebinding default-ns-admin --clusterrole=admin --serviceaccount=default:default-ns-admin  
+
+## 获取serviceaccount的 token 需要用base64解密
+kubectl get secrets default-ns-admin-token-2tm4n -o jsonpath={.data.token}|base64 -d
+```
 
 **用户ssl 认证相关**
 
@@ -1186,8 +1200,6 @@ context用于定义账号与集群的关系，current-context定义当前访问�
 
 **注意：也可以建立clusterrole 使用 rolebing 进行绑定。**
 
-
-
 clusterrole 与clusterrolebinding 
 
 - subject 类型：
@@ -1202,3 +1214,74 @@ role clusterrole:
   - nonResourceURLs
 - action： get, list, watch, patch,  delete, deletecollection
 
+### dashboard 的认证登录
+
+- 认证账号类型必须是ServiceAccount 类型，使用rolebinding或者clusterrolebing 进行权限的赋予
+- 使用`kubectl get secrets default-ns-admin-token-2tm4n -o jsonpath={.data.token}|base64 -d`获取token
+- kubconfig 方式 是token 的封装
+
+使用 kubeconfig 生成 kubeconfig 文件 使用参数 --kubeconfig 指定文件
+
+# kubernetes网络通信
+
+需要解决的问题：
+
+- 同一个pod内部的不同容器间通信, lo
+- Pod间的通信
+- pod与Service的通信: PodIP<--->ClusterIP
+- Service 与集群外部通信
+
+CNI：
+
+- flannel
+- calico
+- canel
+- kube-router
+
+解决方案：
+
+- 虚拟网桥
+- 多路复用：MacVLAN
+- 硬件交换：SR-IOV
+
+## flannel
+
+**不支持网络策略**  不同namespace 的pod 可以相互通信
+
+支持的后端
+
+- Vxlan 
+  - vxlan
+  - Directrouting
+- host-gw： Host Gateway
+- UDP： 效率很低
+
+**flannel 的配置参数：**
+
+- network  
+
+  使用CIRD格式的网络地址：
+
+  10.244.0.0/16 ->
+
+   	master: 10.244.0.0/24
+
+  ​	node1:  10.244.1.0/24
+
+  ​	...
+
+   	node255:  10.244.255.0/24
+
+- SubnetLen 
+
+  在node上使用多长的掩码 默认 24位
+
+- SubnetMin 与SubnetMax  
+
+  网段中最小的子网网段与最大的子网网段。
+
+- Backend： 选择flannel的类型
+
+## Calico/Cannel
+
+可以提供网络策略
