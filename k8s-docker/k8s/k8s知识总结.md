@@ -1333,3 +1333,175 @@ https://docs.projectcalico.org/v3.5/getting-started/kubernetes/installation/othe
 
 **注意：如果是定义egress-only 策略，则需要显式的声明Egress。如果需要一个拒绝所有出流量的策略，需要在value中包含Egress，因为如果不包含egress，默认只包含ingress。**
 
+**阻止所有ingress, 允许所有Egress**
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+```
+
+**允许所有ingress，允许所有Egress**
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress
+```
+
+**阻止所有Egress**
+
+```**
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+```
+
+**案例：**
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 172.17.0.0/16
+        except:
+        - 172.17.1.0/24
+    - namespaceSelector:
+        matchLabels:
+          project: myproject
+    - podSelector:
+        matchLabels:
+          role: frontend
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    ports:
+    - protocol: TCP
+      port: 5978
+```
+
+**总结**
+
+1. NetworkPolicy 针对 namespace 中的 pod 生效。
+2. 默认ingress 禁止， egreess 放行。要默认禁止 egress 需要在 policyTypes 的 value 中加入 egress。
+3. NetworkPolicy 在定义流量匹配上与防火墙类似。
+4. 一般来说对于 提供服务的pod 应该按一下规则定义
+   - 默认关闭所有出入栈
+   - 放行本namespace 中的所有
+   - 定义外部流量
+
+# k8s调度器、预选策略、优选函数
+
+**节点选择过程：**
+
+- 节点预选过程（predicate）
+- 优选过程（priority）
+- 选定节点（select）
+
+## 调度器
+
+### 预选策略
+
+- CheckNodeCondition：检查节点是否正常
+- GeneralPredicates：
+  - Hostname：检查pod对象是否定义了pod.spec.host 
+  - PodFitsHostPorts：检查pod对象的 pod.spec.containers.ports.hostport
+  - MatchNodeSelector：检查pod.spec.nodeSelector
+  - PodFitsResources：检查pod对资源的需求能否被资源满足
+- （默认不启用）NoDiskConflict：检查pod依赖的存储卷 是否能满足需求
+- PodToleratesNodeTains： 检查污点与容忍。pod.spec.tolerations
+- （默认不启用）PodToleratesNodenoExcuteTains：驱离污点
+- （默认不启用）checkNodeLabelPresence：检查标签的存在性
+- （默认不启用）checkServiceAffinity：将 同一个service 下的pod 尽可能放在一个Node下
+
+- MaxEBSVolumeCount
+- MaxGCEPDVolumeCount
+- MaxAzureDiskVolumeCount
+
+- CheckVolumeBinding：
+- NoVolumeZoneConflict：
+
+- CheckNodeMemoryPressure： 检查内存压力
+- CheckNodePIDPressure：检查进程压力
+- CheckNodeDiskPressure
+
+- MatchInterPodAffitnity： pod间的亲和性
+
+### 优选函数
+
+https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/priorities
+
+- LeastRequested：按照资源使用量得分
+- BalancedResourceAllocation ： CPU和内存资源占用率相近的胜出。平衡资源使用情况
+- NodePreferAvoidPods：根据节点的注解信息 "scheduler.aplpha.kubernetes.io/preferAvoidPods" Node 倾向于不
+- TainToleration：将pod对象的spec.tolerations 与node的Tain进行匹配度检查，匹配的条目越多，得分越低。
+- SelectorSpreading：尽可能的将相同标签选择器的pod 分散在不同的node上。
+- InterPodAffinity：亲和性匹配项
+- nodeAffinity：节点亲和性
+- （默认不启用）MostRequested：服务器空闲度越低，越优先
+- （默认不启用）NodeLabel：根据node标签评分
+- （默认不启用）imageLocality：节点上是否有需求的镜像，根据镜像的体积大小之和计算
+
+
+
+**根据预选与优选 影响pod  的节点选择，主要可以通过污点、pod亲和性、node亲和性。**
+
+## 高级调度设置机制
+
+- 节点选择器/节点亲和调度：nodeSelector,  nodeName, nodeAffinity
+
+  
+
+### 节点选择器/节点亲和调度
+
+- nod.spec.nodeName : 根据node 名称选择
+- nod.spec.nodeSelector：根据node 的标签进行选择
+
+**强约束，条件不满足则pedding**
+
+- pod.spec.affinity.nodeAffinity
+  - preferredDuringSchedulingIgnoredDuringExecution  非强制性 ，多条件权重
+  - requiredDuringSchedulingIgnoredDuringExecution   强制性
+
+### pod亲和性
+
+- pod.spec.affinity.podAffinity
+  - preferredDuringSchedulingIgnoredDuringExecution  非强制性
+  - requiredDuringSchedulingIgnoredDuringExecution  强制性
+    - labelSelector
+    - namespace
+    - topologykey  必须的  affinity、anti-affinity
+
