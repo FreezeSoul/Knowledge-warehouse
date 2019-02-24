@@ -1485,7 +1485,7 @@ https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/pri
 
   
 
-### 节点选择器/节点亲和调度
+### node选择器/node亲和调度
 
 - nod.spec.nodeName : 根据node 名称选择
 - nod.spec.nodeSelector：根据node 的标签进行选择
@@ -1504,4 +1504,76 @@ https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/pri
     - labelSelector
     - namespace
     - topologykey  必须的  affinity、anti-affinity
+
+
+
+### 污点调度 Taints 与 Tolerations
+
+**给予node定义，那些pod可以执行**
+
+**node.spec.taints**
+
+```
+FIELDS:
+   effect	<string> -required-
+     Required. The effect of the taint on pods that do not tolerate the taint.
+     Valid effects are NoSchedule, PreferNoSchedule and NoExecute.
+
+   key	<string> -required-
+     Required. The taint key to be applied to a node.
+
+   timeAdded	<string>
+     TimeAdded represents the time at which the taint was added. It is only
+     written for NoExecute taints.
+
+   value	<string>
+     Required. The taint value corresponding to the taint key.
+```
+
+**effect: 用于定义排斥的行为：**
+
+- NoSchedule ：仅仅影响调度过程，对已经存在的pod不产生影响。
+-  PreferNoSchedule：最好不调度，但是可容忍。
+- NoExecute：既影响调度过程，也影响存在的pod对象。驱逐。
+
+**管理节点污点**
+
+```
+ kubectl taint NODE NAME KEY_1=VAL_1:TAINT_EFFECT_1 ... KEY_N=VAL_N:TAINT_EFFECT_N [options]
+```
+
+
+
+**pod.spec.tolerations**
+
+可以让pod 容忍 node 上的污点。
+
+```
+FIELDS:
+   effect	<string>
+     Effect indicates the taint effect to match. Empty means match all taint
+     effects. When specified, allowed values are NoSchedule, PreferNoSchedule
+     and NoExecute.
+
+   key	<string>
+     Key is the taint key that the toleration applies to. Empty means match all
+     taint keys. If the key is empty, operator must be Exists; this combination
+     means to match all values and all keys.
+
+   operator	<string>
+     Operator represents a key's relationship to the value. Valid operators are
+     Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for
+     value, so that a pod can tolerate all taints of a particular category.
+
+   tolerationSeconds	<integer>
+     TolerationSeconds represents the period of time the toleration (which must
+     be of effect NoExecute, otherwise this field is ignored) tolerates the
+     taint. By default, it is not set, which means tolerate the taint forever
+     (do not evict). Zero and negative values will be treated as 0 (evict
+     immediately) by the system.
+
+   value	<string>
+     Value is the taint value the toleration matches to. If the operator is
+     Exists, the value should be empty, otherwise just a regular string.
+```
 
