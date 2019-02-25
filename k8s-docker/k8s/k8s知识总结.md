@@ -1509,7 +1509,9 @@ https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/pri
 
 ### 污点调度 Taints 与 Tolerations
 
-**给予node定义，那些pod可以执行**
+**Taints 给予node定义，那些pod可以执行**
+
+**pod 使用 Tolerations指定容忍的污点 **
 
 **node.spec.taints**
 
@@ -1612,6 +1614,8 @@ limits（ 资源限制，硬限制 ）：
 - 会优先杀掉 **优先级低** 的容器。
 - 按照需求量，占用 **比率高** 的被杀掉。
 
+
+
 ## 数据采集 
 
 ### HeapSter+InfluxDB+Grafana（1.10之前的版本 已经不建议使用）
@@ -1625,5 +1629,35 @@ limits（ 资源限制，硬限制 ）：
 
 https://github.com/huruizhi/kubeasz/blob/master/docs/guide/heapster.md
 
-### prometheus
 
+
+
+
+## 资源指标API 与 自定义指标API
+
+- 资源指标
+- 自定义指标
+
+
+
+**新一代架构**
+
+- 核心指标流水线：kubelet   metric-server  与  API Server 提供的api；监控CPU累计使用率，内存实时使用率，Pod的资源占用与node的磁盘占用率。
+
+- 监控流水线：从系统手机各种指标数据提供给终端用户、存储系统与HPA，非核心指标不能被k8s所解析。
+
+
+
+**kube-aggregator** 作为代理将核心指标的访问指向apiserver，将用户自定义的指标指向metric-server
+
+
+
+![](./pic/k8s-aggregator.png)
+
+## metric-server
+
+资源指标
+
+### prometheus + k8s-prometheus-adapter
+
+自定义指标
