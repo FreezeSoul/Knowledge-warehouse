@@ -1577,3 +1577,53 @@ FIELDS:
      Exists, the value should be empty, otherwise just a regular string.
 ```
 
+
+
+# 容器的资源限制
+
+requests（ 资源需求，最低保障 ）：
+
+limits（ 资源限制，硬限制 ）：
+
+**CPU：** 指CPU线程，一个线程 1000m
+
+**内存**
+
+**QoS Class：自动生成** 
+
+- Guranteed（优先级高）
+
+  同时设置CPU与内存的request和limits
+
+  ​	CPU.limits=CPU.request
+
+   	memory.limits=CPU.request
+
+- Burstable（优先级中）
+
+  至少一个容器设置了CPU或memory的request
+
+- BestEffort（优先级低）
+
+  没有任何一个容器被设置了request和limits
+
+**当服务器的资源不够用的时候**
+
+- 会优先杀掉 **优先级低** 的容器。
+- 按照需求量，占用 **比率高** 的被杀掉。
+
+## 数据采集 
+
+### HeapSter+InfluxDB+Grafana（1.10之前的版本 已经不建议使用）
+
+资源使用量数据采集工具
+
+- cAdvisor：集成与kunelet，收集node上 pod级别的用量
+- HeapSter： 收集汇总数据
+- InfluxDB：持久化数据
+- Grafana：展示数据
+
+https://github.com/huruizhi/kubeasz/blob/master/docs/guide/heapster.md
+
+### prometheus
+
