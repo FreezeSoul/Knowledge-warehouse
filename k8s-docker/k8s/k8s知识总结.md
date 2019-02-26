@@ -1616,9 +1616,7 @@ limits（ 资源限制，硬限制 ）：
 
 
 
-## 数据采集 
-
-### HeapSter+InfluxDB+Grafana（1.10之前的版本 已经不建议使用）
+## HeapSter+InfluxDB+Grafana（1.10之前的版本 已经不建议使用）
 
 资源使用量数据采集工具
 
@@ -1648,16 +1646,32 @@ https://github.com/huruizhi/kubeasz/blob/master/docs/guide/heapster.md
 
 
 
+## metric-server
+
+资源指标
+
 **kube-aggregator** 作为代理将核心指标的访问指向apiserver，将用户自定义的指标指向metric-server
 
 
 
 ![](./pic/k8s-aggregator.png)
 
-## metric-server
 
-资源指标
 
-### prometheus + k8s-prometheus-adapter
+## prometheus + k8s-prometheus-adapter
 
 自定义指标
+
+https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/prometheus
+
+![prometheus架构图](./pic/promethues-architecture.png)
+
+**注意：推荐使用helm安装部署prometues**
+
+## HPA 应用自动伸缩
+
+  kubectl autoscale (-f FILENAME | TYPE NAME | TYPE/NAME) [--min=MINPODS] --max=MAXPODS
+[--cpu-percent=CPU] [options]
+
+`kubectl explain hpa.spec.scaleTargetRef`
+
