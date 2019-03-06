@@ -1246,6 +1246,10 @@ CNI：
 
 ## flannel
 
+**查看集群的flannel 配置文件**
+
+`cat /etc/cni/net.d/10-flannel.conflist `
+
 **不支持网络策略**  不同namespace 的pod 可以相互通信
 
 支持的后端
@@ -1281,6 +1285,27 @@ CNI：
   网段中最小的子网网段与最大的子网网段。
 
 - Backend： 选择flannel的类型
+
+
+
+**修改flannel 类型**
+
+修改配置文件  kube-flannel.yaml
+
+```
+  net-conf.json: |
+    {
+      "Network": "172.20.0.0/16",
+      "Backend": {
+        "Type": "vxlan"
+        "Direcrouting": true
+      }
+    }
+```
+
+
+
+
 
 ## Calico/Cannel
 
@@ -1674,4 +1699,71 @@ https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/prometheus
 [--cpu-percent=CPU] [options]
 
 `kubectl explain hpa.spec.scaleTargetRef`
+
+
+
+# Helm
+
+Chart仓库 
+
+helm 架构 https://helm.sh/docs/architecture/
+
+**主要概念**
+
+- chart 创建Kubernetes应用程序实例所必需的一组信息
+- config 包含可以合并到打包chart中 以创建r elease 对象的配置信息。
+- release chart 的运行实例，具有特定的config
+
+**组件**
+
+Helm有两个主要组成部分：
+
+**Helm Client** 是最终用户的命令行客户端。客户负责以下功能：
+
+- 本地chart开发
+- 管理 仓库
+- 与Tiller服务器交互
+  - 发送要安装的chart
+  - 查询有关release的信息
+  - 请求升级或卸载现有的 releases
+
+**Tiller Server** 是一个集群内服务器，与Helm客户端交互，并与Kubernetes API服务器连接。服务器负责以下事项：
+
+- 侦听来自Helm client 的传入请求
+- 结合chart和config来构建版本
+- 将Chart安装到Kubernetes中，然后跟踪 release
+- 通过与Kubernetes交互来升级和卸载Charts
+
+简而言之，客户端负责管理图表，服务器负责管理版本。
+
+## helm 命令
+
+```
+helm search
+helm repo update
+helm list
+
+release 管理
+helm inspect  # 查看chart信息
+helm install  
+helm delete
+helm upgrade
+helm rolleback
+
+char 操作
+helm create
+helm fetch
+helm inpect  查看chart的详细信息
+helm package 打包chart文件
+```
+
+
+
+## 使用阿里云的helm仓库
+
+```
+helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.5.1 --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+```
+
+
 
