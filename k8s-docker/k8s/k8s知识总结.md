@@ -1765,5 +1765,104 @@ helm package 打包chart文件
 helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.5.1 --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
 ```
 
+## [自定义charts](https://helm.sh/docs/developing_charts/)
+
+```
+wordpress/
+  Chart.yaml          # A YAML file containing information about the chart
+  LICENSE             # OPTIONAL: A plain text file containing the license for the chart
+  README.md           # OPTIONAL: A human-readable README file
+  requirements.yaml   # OPTIONAL: A YAML file listing dependencies for the chart
+  values.yaml         # The default configuration values for this chart
+  charts/             # A directory containing any charts upon which this chart depends.
+  templates/          # A directory of templates that, when combined with values,
+                      # will generate valid Kubernetes manifest files.
+  templates/NOTES.txt # OPTIONAL: A plain text file containing short usage notes
+```
+
+**THE CHART.YAML FILE**
+
+The `Chart.yaml` file is required for a chart. It contains the following fields:
+
+```yaml
+apiVersion: The chart API version, always "v1" (required)
+name: The name of the chart (required)
+version: A SemVer 2 version (required)
+kubeVersion: A SemVer range of compatible Kubernetes versions (optional)
+description: A single-sentence description of this project (optional)
+keywords:
+  - A list of keywords about this project (optional)
+home: The URL of this project's home page (optional)
+sources:
+  - A list of URLs to source code for this project (optional)
+maintainers: # (optional)
+  - name: The maintainer's name (required for each maintainer)
+    email: The maintainer's email (optional for each maintainer)
+    url: A URL for the maintainer (optional for each maintainer)
+engine: gotpl # The name of the template engine (optional, defaults to gotpl)
+icon: A URL to an SVG or PNG image to be used as an icon (optional).
+appVersion: The version of the app that this contains (optional). This needn't be SemVer.
+deprecated: Whether this chart is deprecated (optional, boolean)
+tillerVersion: The version of Tiller that this chart requires. This should be expressed as a SemVer range: ">2.0.0" (optional)
+```
+
+
+
+**requirements.yaml**
+
+A `requirements.yaml` file is a simple file for listing your dependencies.
+
+```yaml
+dependencies:
+  - name: apache
+    version: 1.2.3
+    repository: http://example.com/charts
+  - name: mysql
+    version: 3.2.1
+    repository: http://another.example.com/charts
+```
+
+使用`helm dep`下载依赖
+
+```console
+$ helm dep up foochart
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "local" chart repository
+...Successfully got an update from the "stable" chart repository
+...Successfully got an update from the "example" chart repository
+...Successfully got an update from the "another" chart repository
+Update Complete. Happy Helming!
+Saving 2 charts
+Downloading apache from repo http://example.com/charts
+Downloading mysql from repo http://another.example.com/charts
+```
+
+
+
+**自动生成目录结构**
+
+**go 模板语法**
+
+
+
+**helm 自定义仓库主要命令**
+
+```
+# 创建helm仓库
+helm create
+
+# helm 检测语法
+helm lint
+
+# helm 打包
+helm package
+
+# 启动本地helm 端口8879
+helm serve
+
+helm delete --purge
+
+```
+
 
 
