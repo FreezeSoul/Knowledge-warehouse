@@ -1866,3 +1866,45 @@ helm delete --purge
 
 
 
+
+
+# Istio
+
+- 连接( Connect )
+- 安全( Secure )
+- 控制( Control )
+- 观察( Observe )
+
+**功能**
+
+- 流量管理
+  - 负载均衡
+  - 动态路由
+  - 灰度发布
+  - 故障注入
+- 可观察性
+  - 调用链
+  - 访问日志
+  - 监控
+- 策略执行
+  - 限制流量
+  - ACL
+- 服务身份和安全
+  - 认证
+  - 鉴权
+
+**扩展能力**
+
+- 平台支持
+  - k8s
+  - Cloudfoundry
+  - Eureka
+  - consul
+- 集成和定制
+  - ACL
+  - 日志
+  - 配额
+
+## 架构
+
+[](./pic/istioarch.svg)
