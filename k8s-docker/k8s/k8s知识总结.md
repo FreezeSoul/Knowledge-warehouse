@@ -1711,7 +1711,7 @@ helm 架构 https://helm.sh/docs/architecture/
 **主要概念**
 
 - chart 创建Kubernetes应用程序实例所必需的一组信息
-- config 包含可以合并到打包chart中 以创建r elease 对象的配置信息。
+- config 包含可以合并到打包chart中 以创建release 对象的配置信息。
 - release chart 的运行实例，具有特定的config
 
 **组件**
@@ -1908,3 +1908,18 @@ helm delete --purge
 ## 架构
 
 [](./pic/istioarch.svg)
+
+
+
+
+
+```
+sudo cp -n /lib/systemd/system/docker.service /etc/systemd/system/docker.service
+sudo sed -i "s|ExecStart=/usr/bin/docker daemon|ExecStart=/usr/bin/docker daemon --registry-mirror=https://rflxlgcf.mirror.aliyuncs.com|g" /etc/systemd/system/docker.service
+sudo sed -i "s|ExecStart=/usr/bin/dockerd|ExecStart=/usr/bin/dockerd --registry-mirror=https://rflxlgcf.mirror.aliyuncs.com|g" /etc/systemd/system/docker.service
+sudo systemctl daemon-reload
+sudo service docker restart
+```
+
+
+
