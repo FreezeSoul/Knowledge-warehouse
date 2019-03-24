@@ -4,7 +4,7 @@
 
 # kubenetes 特性
 
-- 足鼎封装、自我修复、水平扩展、服务发现、负载均衡
+- 封装、自我修复、水平扩展、服务发现、负载均衡
 - 自动发布、回滚
 - 秘钥和配置管理
 
@@ -61,7 +61,7 @@ kubectl get pods -l <labels>
 查看所有标签
 
 ```
-kubectl get pods --shoe-labels
+kubectl get pods --show-labels
 ```
 
 打标签
@@ -1711,7 +1711,7 @@ helm 架构 https://helm.sh/docs/architecture/
 **主要概念**
 
 - chart 创建Kubernetes应用程序实例所必需的一组信息
-- config 包含可以合并到打包chart中 以创建release 对象的配置信息。
+- config 包含可以合并到打包chart中 以创建r elease 对象的配置信息。
 - release chart 的运行实例，具有特定的config
 
 **组件**
