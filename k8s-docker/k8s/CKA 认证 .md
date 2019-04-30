@@ -1,5 +1,7 @@
 ## CKA 认证
 
+[TOC]
+
 考核日常运维k8s 集群所需的 知识、技能、**熟练度**。
 
 - 核心概
@@ -175,4 +177,74 @@ https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/algorithm/pre
 ```
 kube-scheduler
 ```
+
+
+
+## 日志、监控
+
+### 状态
+
+```
+kubectl cluster-info
+kubectl cluster-info dump
+kubectl top node/pod 
+```
+
+### k8s组件日志
+
+```
+kubectl logs -f {pod name} -c {container name} -n {namespace}
+## 进入容器
+kubectl exec -it  {pod name} -c {container name} -n {namespace} -- /bin/bash
+```
+
+### 日志目录的挂载
+
+
+
+## Deployment
+
+### 升级和回滚
+
+```
+kubectl set image
+kubectl set resource
+kubectl edit
+kubectl rollout pause
+kubectl rollout resume
+kubectl rollout status
+kubectl rollout history
+kubectl rollout undo 
+
+## 伸缩
+kubectl scale deploy nginx --replicas=10
+kubectl autoscale deployment nginx --min=10 --max=15 --cpu-percent=80
+```
+
+
+
+### 升级过程定义
+
+```
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: 
+      maxSurge: 1
+      maxUnavailable: 1
+```
+
+
+
+### 应用自恢复: restartPolicy + livessnessProbe 
+
+pod. spec.restartPolicy : Always OnFailure
+
+livessnessProbe
+
+
+
+### 练习题
+
+1. 通过Deployment 方式，使用redis镜像创建1个pod， 获取启动日志
+2. 通过命令行创建1个deployment 副本数为3  镜像为nginx:latest。然后滚动升级搭配nginx:1.9.1
 
