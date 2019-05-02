@@ -2,7 +2,7 @@
 
 考核日常运维k8s 集群所需的 知识、技能、**熟练度**。
 
-- 核心概
+[TOC]
 
 
 
@@ -69,7 +69,24 @@ Other Commands：
 - help
 - version
 
+## linux 名称空间
 
+[DOCKER基础技术：LINUX NAMESPACE（上）](<https://coolshell.cn/articles/17010.html>)
+
+[DOCKER基础技术：LINUX NAMESPACE（下）](<https://coolshell.cn/articles/17029.html>)
+
+| 分类                   | 作用                                                         |
+| ---------------------- | ------------------------------------------------------------ |
+| **Mount namespaces**   | 文件系统隔离                                                 |
+| **UTS namespaces**     | 主机名和域名的隔离                                           |
+| **IPC namespaces**     | IPC全称 Inter-Process Communication，是Unix/Linux下进程间通信的一种方式，IPC有共享内存、信号量、消息队列等方法。 |
+| **PID namespaces**     | 隔离进程的ID空间                                             |
+| **Network namespaces** | 网络隔离                                                     |
+| **User namespaces**    | 用户隔离                                                     |
+
+## Cgroup
+
+[linux  Cgroup介绍](https://www.cnblogs.com/zhengran/p/4436591.html)
 
 ##  影响调度的主要属性
 
@@ -176,3 +193,6 @@ https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/algorithm/pre
 kube-scheduler
 ```
 
+
+
+## 网络
