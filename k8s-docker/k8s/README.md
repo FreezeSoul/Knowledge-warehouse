@@ -13,6 +13,4 @@ kubenetes 安装部署参考 github 项目 [kubeasz](https://github.com/gjmzj/ku
 - [kubernetes 官网](https://kubernetes.io/docs/home/)
 - [nginx-ingress](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/)
 - [kubeasz](https://github.com/gjmzj/kubeasz)
-
-
-
+- [kube-api文档](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13)
