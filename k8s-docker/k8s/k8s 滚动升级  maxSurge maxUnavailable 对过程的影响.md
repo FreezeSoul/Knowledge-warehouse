@@ -1,6 +1,16 @@
 ## k8s 滚动升级  maxSurge maxUnavailable 对过程的影响
 
 ```
+new rs desire + old rs desire <= replic + maxSurge
+
+new rs running + new rs >= replic - maxUnavailable
+```
+
+
+
+案例
+
+```
 nginx-54cd8b4545   5     0     0     0s
 nginx-64bbd8bbfc   8     10    10    35s
 nginx-54cd8b4545   7     0     0     0s
@@ -53,4 +63,3 @@ nginx-64bbd8bbfc   0     0     0     45s
 nginx-54cd8b4545   10    10    9     10s
 nginx-54cd8b4545   10    10    10    10s
 ```
-
