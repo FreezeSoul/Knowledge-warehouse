@@ -147,51 +147,44 @@ C:\Python27\python.exe C:/Users/liu.chunming/PycharmProjects/Myproject/log.py
 
 第一步，创建一个logger；第二步，创建一个handler，用于写入日志文件；第三步，再创建一个handler，用于输出到控制台；第四步，定义handler的输出格式；第五步，将logger添加到handler里面。这段代码里面提到了好多概念，包括：Logger，Handler，Formatter。后面讲对这些概念进行讲解。
 
-##  3 多个模块中日志输出顺序
-
-通常我们的工作中会有多个模块都需要输出日志。那么，具有调用关系的模块之间，它门的日志输出顺序是怎么样的？我们来演示下：假设有两个文件，分别是util.py：
+##  3 多文件输出
 
 ```python
-# util.py
+# 定义文件
+file_1_1 = logging.FileHandler('l1_1.log', 'a', encoding='utf-8')
+fmt = logging.Formatter(fmt="%(asctime)s - %(name)s - %(levelname)s -%(module)s:  %(message)s")
+file_1_1.setFormatter(fmt)
 
-import logging
+file_1_2 = logging.FileHandler('l1_2.log', 'a', encoding='utf-8')
+fmt = logging.Formatter()
+file_1_2.setFormatter(fmt)
 
-def fun():
-    logging.info('this is a log in util module')
+# 定义日志
+logger1 = logging.Logger('s1', level=logging.ERROR)
+logger1.addHandler(file_1_1)
+logger1.addHandler(file_1_2)
+
+
+# 写日志
+logger1.critical('1111')
+
+日志一
 ```
 
 和main.py
 
 ```python
-# main.py
-# coding=utf-8
-import logging
-import util
-logging.basicConfig(level=logging.INFO,
-                    filename='./log/log.txt',
-                    filemode='w',
-                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+# 定义文件
+file_2_1 = logging.FileHandler('l2_1.log', 'a')
+fmt = logging.Formatter()
+file_2_1.setFormatter(fmt)
 
-def main():
-    logging.info('main module start')
-    util.fun()
-    logging.info('main module stop')
+# 定义日志
+logger2 = logging.Logger('s2', level=logging.INFO)
+logger2.addHandler(file_2_1)
 
-if __name__ == '__main__':
-    main()
+日志（二）
 ```
-
-运行后打开log.txt，结果如下：
-```
-2015-05-21 18:10:34,684 - main.py[line:11] - INFO: main module start
-
-2015-05-21 18:10:34,684 - util.py[line:5] - INFO: this is a log in util module
-
-2015-05-21 18:10:34,684 - main.py[line:13] - INFO: main module stop
-```
-【解析】
-
-可以看出，日志的输出顺序就是模块的执行顺序。
 
 ## 4 日志格式说明
 
@@ -217,243 +210,3 @@ format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s
 
 这个格式可以输出日志的打印时间，是哪个模块输出的，输出的日志级别是什么，以及输入的日志内容。
 
-## 5 高级进阶
-
-接下来学习一些日志组件以及一些高级部分。日志组件包括：`loggers`、`handlers`,`filters`,`formatters`.
-
-Logger 对象扮演了三重角色.首先,它暴露给应用几个方法以便应用可以在运行时写log.其次,Logger对象按照log信息的严重程度或者根据filter对 象来决定如何处理log信息(默认的过滤功能).最后,logger还负责把log信息传送给相关的loghandlers.
-
-Handler对象负责分配合适的log信息(基于log信息的严重 程度)到handler指定的目的地.Logger对象可以用addHandler()方法添加零个或多个handler对象到它自身.一个常见的场景 是,一个应用可能希望把所有的log信息都发送到一个log文件中去,所有的error级别以上的log信息都发送到stdout,所有critical 的log信息通过email发送.这个场景里要求三个不同handler处理,每个handler负责把特定的log信息发送到特定的地方.
-
-filter:细致化，选择哪些日志输出
-
-format:设置显示格式
-```
-1、logging.basicConfig([**kwargs]):
-
-> Does basic configuration for the logging system by creating a [`StreamHandler`](http://docs.python.org/2.7/library/logging.handlers.html#logging.StreamHandler) with a default[`Formatter`](http://docs.python.org/2.7/library/logging.html#logging.Formatter) and adding it to the root logger. The functions[`debug()`](http://docs.python.org/2.7/library/logging.html#logging.debug),[`info()`](http://docs.python.org/2.7/library/logging.html#logging.info),[`warning()`](http://docs.python.org/2.7/library/logging.html#logging.warning),[`error()`](http://docs.python.org/2.7/library/logging.html#logging.error) and[`critical()`](http://docs.python.org/2.7/library/logging.html#logging.critical) will call[`basicConfig()`](http://docs.python.org/2.7/library/logging.html#logging.basicConfig)automatically if no handlers are defined for the root logger.
->
-> This function does nothing if the root logger already has handlers configured for it.
-```
-为日志模块配置基本信息。kwargs 支持如下几个关键字参数：
-**filename** ：日志文件的保存路径。如果配置了些参数，将**自动创建一个FileHandler作为Handler；filemode** ：日志文件的打开模式。 默认值为'a'，表示日志消息以追加的形式添加到日志文件中。如果设为'w', 那么每次程序启动的时候都会创建一个新的日志文件；
-**format** ：设置日志输出格式；
-**datefmt** ：定义日期格式；
-**level** ：设置日志的级别.对低于该级别的日志消息将被忽略；
-**stream** ：设置特定的流用于初始化StreamHandler；
-
-演示如下：
-
-```
-import logging
-import os
-FILE=os.getcwd()
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s:%(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename = os.path.join(FILE,'log.txt'),
-                    filemode='w')
-logging.info('msg')
-logging.debug('msg2')
-```
-
-2、logging.getLogger([name])
-
-创建Logger对象。日志记录的工作主要由Logger对象来完成。在调用getLogger时要提供Logger的名称（注：多次使用相同名称 来调用getLogger，返回的是同一个对象的引用。），Logger实例之间有层次关系，这些关系通过Logger名称来体现，如：
-
-p = logging.getLogger("root")
-
-c1 = logging.getLogger("root.c1")
-
-c2 = logging.getLogger("root.c2")
-
-例子中，p是父logger, c1,c2分别是p的子logger。c1, c2将继承p的设置。如果省略了name参数, getLogger将返回日志对象层次关系中的根Logger。
-
-```
-import logging
-'''命名'''
-log2=logging.getLogger('BeginMan')  #生成一个日志对象
-print log2  #<logging.Logger object at 0x00000000026D1710>
-
-'''无名'''
-log3 = logging.getLogger()
-print log3  #<logging.RootLogger object at 0x0000000002721630> 如果没有指定name，则返回RootLogger
-
-'''最好的方式'''
-log = logging.getLogger(__name__)#__name__ is the module’s name in the Python package namespace.
-print log   #<logging.Logger object at 0x0000000001CD5518>  Logger对象
-print __name__  #__main__
-```
-
-
-三、Logger对象
-
-通过logging.getLogger(nam)来获取Logger对象，
-
-**Class logging.Logger**
-
-有如下属性和方法：
-
-1、Logger.propagate
-
-```
-print log.propagate         #1
-```
-
-具体参考：http://docs.python.org/2.7/library/logging.html
-
-2、Logger.setLevel(lvl)
-
-设置日志的级别。对于低于该级别的日志消息将被忽略.
-
-
-```
-import logging
-import os
-logging.basicConfig(format="%(levelname)s,%(message)s",filename=os.path.join(os.getcwd(),'log.txt'),level=logging.DEBUG)
-log = logging.getLogger('root.set')   #Logger对象
-print log.propagate         #1
-log.setLevel(logging.WARN)  #日志记录级别为WARNNING  
-log.info('msg')             #不会被记录
-log.debug('msg')            #不会被记录
-log.warning('msg')
-log.error('msg')
-```
-
-
-3、Logger.debug(msg [ ,*args [, **kwargs]])
-
-记录DEBUG级别的日志信息。参数msg是信息的格式，args与kwargs分别是格式参数。
-
-
-```
-import logging
-logging.basicConfig(filename = os.path.join(os.getcwd(), 'log.txt'), level = logging.DEBUG)
-log = logging.getLogger('root')
-log.debug('%s, %s, %s', *('error', 'debug', 'info'))
-log.debug('%(module)s, %(info)s', {'module': 'log', 'info': 'error'})
-```
-
-4、同上
-
-### Logger.info(msg[ , *args[ , **kwargs] ] )
-
-### Logger.warnning(msg[ , *args[ , **kwargs] ] )
-
-### Logger.error(msg[ , *args[ , **kwargs] ] )
-
-### Logger.critical(msg[ , *args[ , **kwargs] ] )
-
-5、Logger.log(lvl, msg[ , *args[ , **kwargs]] )
-
-记录日志，参数lvl用户设置日志信息的级别。参数msg, *args, **kwargs的含义与Logger.debug一样。
-
-```
-log.log(logging.ERROR,'%(module)s %(info)s',{'module':'log日志','info':'error'}) #ERROR,log日志 error
-log.log(logging.ERROR,'再来一遍：%s,%s',*('log日志','error'))  #ERROR,再来一遍：log日志,error
-```
-
-6、Logger.exception(msg[, *args])
-
-以ERROR级别记录日志消息，异常跟踪信息将被自动添加到日志消息里。Logger.exception通过用在异常处理块中，如：
-
-```
-import logging
-import os
-logging.basicConfig(format="%(levelname)s,%(message)s",filename=os.path.join(os.getcwd(),'log.txt'),level=logging.DEBUG)
-log = logging.getLogger('root')   #Logger对象
-try:
-    raise Exception,u'错误异常'
-except:
-    log.exception('exception')  #异常信息被自动添加到日志消息中  
-打开文件，显示如下：
-
-'''ERROR,exception
-Traceback (most recent call last):
-  File "E:\project\py\src\log3.py", line 12, in <module>
-    raise Exception,u'错误异常'
-Exception: 错误异常
-'''
-```
-
-
-7、`Logger.``addFilter`(*filt*)
-
-指定过滤器
-
-8、`Logger.``removeFilter`(*filt*)
-
-移除指定的过滤器
-
-9、`Logger.``filter`(*record*)
-
-....其他的后面介绍
-
-四、 Handler对象、Formatter对象、Filter对象、Filter对象
-
-这里简要介绍
-
-
-```
-#coding=utf8
-'''
-Created on 2013年9月23日
-Function : Handler对象、Formatter对象、Filter对象、Filter对象
-@author : BeginMan
-'''
-import logging
-import os
-'''Logger'''
-l = logging.Logger('root')          #创建Logger对象
-log = logging.getLogger('root')     #通过logging.getLogger创建Logger对象
-print l                             #<logging.Logger object at 0x0000000001DF5B70>
-print log                           #<logging.Logger object at 0x00000000022A16D8>
-
-'''Handler'''
-handler = logging.Handler()         #创建Handler对象
-handler.__init__(logging.DEBUG)     #通过设置level来初始化Handler实例
-handler.createLock()                #初始化一个线程锁可以用来序列化访问底层I / O功能,这可能不是线程安全的。
-handler.acquire()                   #获取线程锁通过handler.createLock()
-handler.release()                   #释放线程锁通过获取handler.acquire()
-handler.setLevel(logging.DEBUG)     #设置临界值，如果Logging信息级别小于它则被忽视，当一个handler对象被创建，级别没有被设置，导致所有的信息会被处理。
-handler.setFormatter("%(levelname)s,%(message)s")              #设置格式
-# handler.addFilter(filter)         #添加指定的过滤器
-# handler.removeFilter(filter)      #移除指定的过滤器
-# handler.filter(record)            #通过设置过滤器适用于记录并返回真值如果要处理的记录
-handler.flush()                     #确保所有的日志输出已经被刷新
-handler.close()                     #收拾任何所使用资源处理程序,
-# handler.handle(record)            #有条件地发出指定的日志记录,这取决于过滤器可能被添加到处理程序。
-# handler.handlerError(record)      #处理错误
-# handler.format(record)            #格式输出
-# handler.emit(record)
-
-#Formatter:http://docs.python.org/2.7/library/logging.html#logging.Formatter
-
-'''Formatter:
-the base Formatter allows a formatter string to be specified,is none ,used default value '%(message)s'
-class logging.Formatter(fmt=None,datefmt=None)
-If no fmt is specified, '%(message)s' is used. If no datefmt is specified, the ISO8601 date format is used.
-'''
-fm = logging.Formatter('%(levelname)s:%(message)s','%m/%d/%Y %I:%M:%S %p')
-print fm        #<logging.Formatter object at 0x0000000002311828>
-#有如下方法:format()、formatTime()、formatException()
-
-#http://docs.python.org/2.7/library/logging.html#formatter-objects
-
-'''Filter'''
-'''
-class logging.Filter(name=''):
-    返回Filter实例，If name is specified, it names a logger which, together with its children, 
-  will have its events allowed through the filter. If name is the empty string, allows every event.
-用于Loggers、Handlers等过滤的设置
-如果一个过滤器初始化为'A.B',则允许'A.B/A.B.C/A.B.C.D/A.B.D'等，但不允许'A.BB/B.A'等通过
-如果初始化为空字符串，则没有过滤。
-它有filter()方法
-'''
-
-'''LogRecord '''
-'''class logging.LogRecord(name, level, pathname, lineno, msg, args, exc_info, func=None)
-LogRecord 实例可以被Logger自动创建.也可以通过makeLogRecord()来创建'''
-#http://docs.python.org/2.7/library/logging.html#logrecord-objects
-```

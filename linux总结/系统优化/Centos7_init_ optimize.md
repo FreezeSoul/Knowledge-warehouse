@@ -110,7 +110,7 @@ EOF
  
  
 #update soft
-yum -y update
+# yum -y update
  
 cat << EOF
 +-------------------------------------------------+

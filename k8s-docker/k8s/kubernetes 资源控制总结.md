@@ -1,5 +1,7 @@
 # kubernetes 资源控制总结
 
+[TOC]
+
 ## kubernetes 资源控制的几种方式
 
 k8s 可以通过以下几种方式进行资源控制
@@ -45,7 +47,3 @@ min <= pod 中所有container的resource 资源限制之和 <= max
 ```
 
 **limitrange 控制策略在Pod Admission 阶段生效，对于在running 的pod不生效**
-
-
-
-## resource quotas
