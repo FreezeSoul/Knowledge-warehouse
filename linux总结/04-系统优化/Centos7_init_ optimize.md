@@ -25,7 +25,7 @@ nameserver 192.168.0.156
 EOF
 #Yum源更换为国内阿里源
 yum install wget telnet -y
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+rm -f /etc/yum.repos.d/*
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
  
 #添加阿里的epel源
