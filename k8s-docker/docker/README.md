@@ -1,33 +1,27 @@
 ## 本章内容
 
-本章作为k8s的前置部分主要对docker进行介绍。
+学习了解容器的基本知识，掌握Docker 的基本概念与 基本操作。
 
-Docker 三大工具：
+**本章目标：**
 
-- Docker Machine
+- 了解OCI、容器与Docker之间的管理
+- 了解Docker 虚拟化原理
+- 掌握Docker 的安装
+- 掌握Docker 镜像的创建与管理
+- 了解Docker 的网络知识
 
-- Docker Compose
+**文档目录：**
 
-- Docker swarm
+[00-Docker简介.md](./00-Docker简介.md)
 
-docker的镜像生成工具：
+[01-Docker虚拟化原理](./01-Docker虚拟化原理.md)
 
-- Dockerfile
+[02-Docker安装部署](02-Docker安装部署.md)
 
-Docker Machine 与Docker swarm的功能与k8s的功能重复，所以本章不会进行介绍。
+[03-Docker镜像管理基础](03-Docker镜像管理基础.md)
 
-docker-compose用于单台服务器上的容器编排。
+[04-Docker虚拟化网络概述](04-Docker虚拟化网络概述.md)
 
-本章分为以下几个部分
+[05-Docker容器网络](05-Docker容器网络.md)
 
-[00-Docker简介.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/00-Docker%E7%AE%80%E4%BB%8B.md)
-
-[01-Docker 安装部署.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/01-Docker%20%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2.md)
-
-[02-常用命令.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/02-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.md)（未完成）
-
-[03-Dockerfile.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/03-Dockerfile.md)
-
-[04-DockerCompose.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/04-DockerCompose.md)（未完成）
-
-[05-Docker的组件介绍.md](https://github.com/huruizhi/Knowledge-warehouse/blob/master/k8s-docker/docker/05-Docker%E7%9A%84%E7%BB%84%E4%BB%B6%E4%BB%8B%E7%BB%8D.md)
+[06-Dockerfile简介](06-Dockerfile简介.md)

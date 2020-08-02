@@ -37,7 +37,7 @@ sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/cen
 yum list docker-ce --showduplicates
 ```
 
-安装17.03.2的docker版本
+安装17.03.2的docker版本，版本根据自己需求进行选择。
 
 ```
 yum install -y --setopt=obsoletes=0 \
